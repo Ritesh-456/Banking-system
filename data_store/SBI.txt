@@ -1,22 +1,12 @@
 {
     "1234": {
         "bank_name": "SBI",
-        "first_name": "ritesh",
-        "last_name": "kumar",
-        "email_id": "ritesh@kumar.com",
-        "phone_number": 46313431,
-        "aadhar_card": 133464,
-        "pan_card": "lkad987213s",
-        "balance": 0
-    },
-    "4567": {
-        "bank_name": "SBI",
-        "first_name": "kalyyan",
-        "last_name": "mohapatra",
-        "email_id": "kalyan987kumar@gmail.com",
-        "phone_number": 32465431,
-        "aadhar_card": 356464,
-        "pan_card": "jbdj54k",
+        "first_name": "Ritesh",
+        "last_name": "Brahmachari",
+        "email_id": "brahmachariritesh@gmail.com",
+        "phone_number": 12345678890,
+        "aadhar_card": 123456123789,
+        "pan_card": "BGBF4564M",
         "balance": 0
     }
 }
