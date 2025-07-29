@@ -22,7 +22,6 @@ account_type = input("Are you a new customer? (yes/no): ").strip().lower()
 
 # ------------------------ NEW CUSTOMER ------------------------
 if account_type == 'yes':
-    # Ask for bank choice
     new_customer = int(input(
         "Choose your Bank:\n"
         "1. SBI\n"
@@ -39,6 +38,8 @@ if account_type == 'yes':
         exit()
 
     file_path = os.path.join(folder_path, f"{bank_key.upper()}.txt")
+
+    # Load users if file exists
     if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
         with open(file_path, "r") as f:
             try:
@@ -49,24 +50,24 @@ if account_type == 'yes':
         all_users = {}
 
     # Collect new user data
-    user_data = {
-        "bank_name": bank_key.upper(),
-        "first_name": input("First Name: "),
-        "last_name": input("Last Name: "),
-        "email_id": input("Email: "),
-        "phone_number": int(input("Phone Number: ")),
-        "aadhar_card": int(input("Aadhar Number: ")),
-        "pan_card": input("PAN Number: "),
-        "balance": 0
-    }
-
-    pin = input("Create 4-digit PIN: ")
-    re_pin = input("Re-enter PIN to confirm: ")
+    pin = input("Create 4-digit PIN: ").strip()
+    re_pin = input("Re-enter PIN to confirm: ").strip()
 
     if pin == re_pin:
         if pin in all_users:
             print("❌ PIN already used. Try again.")
         else:
+            user_data = {
+                "bank_name": bank_key.upper(),
+                "first_name": input("First Name: "),
+                "last_name": input("Last Name: "),
+                "email_id": input("Email: "),
+                "phone_number": int(input("Phone Number: ")),
+                "aadhar_card": int(input("Aadhar Number: ")),
+                "pan_card": input("PAN Number: "),
+                "balance": 0,
+                "pin": pin  # ✅ Save the pin in user data
+            }
             all_users[pin] = user_data
             with open(file_path, "w") as f:
                 json.dump(all_users, f, indent=4)
@@ -74,70 +75,69 @@ if account_type == 'yes':
     else:
         print("❌ PINs do not match.")
 
-
 # ------------------------ EXISTING CUSTOMER ------------------------
-
-
 elif account_type == 'no':
-    bank_input = input("Enter your bank name (sbi/bob/pnb/canara/union): ").strip().lower()
+    pin = input("Enter your 4-digit PIN: ").strip()
 
-    if bank_input not in bank_map.values():
-        print("❌ Invalid bank name.")
-        exit()
+    found = False
+    for bank_key in bank_map.values():
+        file_path = os.path.join(folder_path, f"{bank_key.upper()}.txt")
+        if not os.path.exists(file_path):
+            continue
 
-    file_path = os.path.join(folder_path, f"{bank_input.upper()}.txt")
-    if not os.path.exists(file_path):
-        print("❌ No customer data found for this bank.")
-        exit()
+        with open(file_path, "r") as f:
+            try:
+                all_users = json.load(f)
+            except json.JSONDecodeError:
+                continue
 
-    try:
-        module = importlib.import_module(f"bank_classes.{bank_input}")
-        BankClass = getattr(module, bank_input.upper())
-    except Exception as e:
-        print(f"❌ Error loading bank class: {e}")
-        exit()
+        if pin in all_users:
+            found = True
+            user_data = all_users[pin]
+            bank_name = user_data["bank_name"].lower()
 
-    with open(file_path, "r") as f:
-        try:
-            all_users = json.load(f)
-        except json.JSONDecodeError:
-            all_users = {}
+            try:
+                module = importlib.import_module(f"bank_classes.{bank_name}")
+                BankClass = getattr(module, bank_name.upper())
+            except Exception as e:
+                print(f"❌ Error loading class for {bank_name.upper()}: {e}")
+                exit()
 
-    pin = input("Enter your 4-digit PIN: ")
+            user = BankClass(user_data)
 
-    if pin not in all_users:
-        print("❌ Invalid PIN. No such account found.")
-        exit()
+            # ✅ Ensure pin comparison is correct
+            if not user.match_pin(pin):
+                print("❌ PIN mismatch. Access denied.")
+                exit()
 
-    user_data = all_users[pin]
+            print(f"\n✅ Welcome back, {user_data['first_name']}!")
 
-    # Instantiate the bank class and match pin
-    user = BankClass(user_data)
-    if not user.match_pin(pin):
-        print("❌ PIN mismatch. Access denied.")
-        exit()
+            # Banking menu
+            while True:
+                print("\n1. Deposit\n2. Withdraw\n3. Check Balance\n4. Exit")
+                choice = input("Choose an option: ")
 
-    print(f"\n✅ Welcome back, {user_data['first_name']}!")
+                if choice == '1':
+                    amt = int(input("Enter amount to deposit: "))
+                    user.deposit(amt)
+                elif choice == '2':
+                    amt = int(input("Enter amount to withdraw: "))
+                    user.withdraw(amt)
+                elif choice == '3':
+                    user.check_balance()
+                elif choice == '4':
+                    break
+                else:
+                    print("❌ Invalid option.")
 
-    # Options loop
-    while True:
-        print("\n1. Deposit\n2. Withdraw\n3. Check Balance\n4. Exit")
-        choice = input("Choose an option: ")
-
-        if choice == '1':
-            amt = int(input("Enter amount to deposit: "))
-            user.deposit(amt)
-        elif choice == '2':
-            amt = int(input("Enter amount to withdraw: "))
-            user.withdraw(amt)
-        elif choice == '3':
-            user.check_balance()
-        elif choice == '4':
+            # ✅ Save updated data
+            all_users[pin] = user.data
+            with open(file_path, "w") as f:
+                json.dump(all_users, f, indent=4)
             break
-        else:
-            print("❌ Invalid option.")
 
-    # Save updated data
-    all_users[pin] = user.data
-    with open(file_path, "w") as f:
-        json.dump(all_users, f, indent=4)
+    if not found:
+        print("❌ No account found with this PIN.")
+
+else:
+    print("❌ Invalid input. Please type 'yes' or 'no'.")

@@ -1,0 +1,13 @@
+{
+    "7896": {
+        "bank_name": "Canara",
+        "first_name": "Mukesh",
+        "last_name": "Kumar",
+        "email_id": "kumarmukesh@gmail.com",
+        "phone_number": 123564665,
+        "aadhar_card": 899876546532123,
+        "pan_card": "GHJH56432",
+        "balance": 1000,
+        "pin": "7896"
+    }
+}

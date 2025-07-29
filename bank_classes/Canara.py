@@ -1,20 +1,21 @@
-class Canara:
+class CANARA:
     def __init__(self, user_data):
         self.data = user_data
+        self.pin = user_data.get("pin")  # ✅ fix here
 
-    def match_pin(self, input_pin):
-        return input_pin == self.data.get("pin")
+    def match_pin(self, entered_pin):
+        return str(entered_pin) == self.pin
 
     def deposit(self, amount):
         self.data["balance"] += amount
-        print(f"✅ ₹{amount} deposited. New Balance: ₹{self.data['balance']}")
+        print(f"💰 ₹{amount} deposited successfully.")
 
     def withdraw(self, amount):
-        if amount > self.data["balance"]:
-            print("❌ Insufficient balance.")
-        else:
+        if self.data["balance"] >= amount:
             self.data["balance"] -= amount
-            print(f"✅ ₹{amount} withdrawn. Remaining Balance: ₹{self.data['balance']}")
+            print(f"💸 ₹{amount} withdrawn successfully.")
+        else:
+            print("❌ Insufficient balance.")
 
     def check_balance(self):
-        print(f"🔍 Balance: ₹{self.data['balance']}")
+        print(f"💼 Your current balance is ₹{self.data['balance']}.")
