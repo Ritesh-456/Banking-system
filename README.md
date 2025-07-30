@@ -12,7 +12,7 @@ bank_project/
 ├── data_store/ # Stores user JSON data by bank
 │ └── SBI.txt # Example file
 ├── bank_classes/ # Bank-wise class files
-│ ├── init.py
+│ ├── __init__.py
 │ └── sbi.py # SBI Bank class
 ├── requirements.txt # Python dependencies
 └── README.md # Project documentation
